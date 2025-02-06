@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 from app.forms import ContactForm
-from app.models import db, Project
+from app.models import db, Project, Message
 
 main = Blueprint("main", __name__)
 
@@ -18,14 +18,20 @@ def experience():
 
 @main.route("/projects")
 def projects():
-    projects = Project.query.all()  # Fetch projects from the database
+    projects = Project.query.all()  # Fetch projects from DB
     return render_template("projects.html", projects=projects)
 
 @main.route("/contact", methods=["GET", "POST"])
 def contact():
     form = ContactForm()
     if form.validate_on_submit():
-        # Simulate sending an email (actual logic requires Flask-Mail setup)
+        new_message = Message(
+            name=form.name.data, 
+            email=form.email.data, 
+            message=form.message.data
+        )
+        db.session.add(new_message)
+        db.session.commit()
         flash("Message sent successfully!", "success")
         return redirect(url_for("main.contact"))
     
